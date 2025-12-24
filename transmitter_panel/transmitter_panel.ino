@@ -41,15 +41,15 @@ bool modeOTA = false;
 unsigned long lastTimeSend = 0;
 const unsigned long intervalSendTime = 60000; // 1 menit
 
-struct SettingCache {
-  int Br=50;
-  int Sptx1=50;
-  int Sptx2=50;
-  int Spdt=50;
-  int Spnm=50;
-  bool Bzr=1;
-  int Da=40;
-  int CoHi=-1;
+struct SettingDisplay {
+  int Br=100;
+  int Sptx1=10;
+  int Sptx2=20;
+  int Spdt=30;
+  int Spnm=40;
+  bool Bzr=0;
+  int Da=50;
+  int CoHi=0;
   int mode=0;
   String newPassword="00000000";
 } settingCache;
@@ -104,7 +104,7 @@ void handleGetDisplay() {
   json += "\"Spnm\":" + String(settingCache.Spnm) + ",";
   json += "\"Bzr\":" + String(settingCache.Bzr) + ",";
   json += "\"Da\":" + String(settingCache.Da) + ",";
-  json += "\"CoH\":" + String(settingCache.CoHi) + ",";
+  json += "\"CoHi\":" + String(settingCache.CoHi) + ",";
   json += "\"newPassword\":\"" + settingCache.newPassword + "\",";
   json += "\"mode\":" + String(settingCache.mode);
 
