@@ -41,18 +41,41 @@ bool modeOTA = false;
 unsigned long lastTimeSend = 0;
 const unsigned long intervalSendTime = 60000; // 1 menit
 
+/////////////////////////////
+///////struck Display////////
+/////////////////////////////
 struct SettingDisplay {
-  int Br=100;
-  int Sptx1=10;
-  int Sptx2=20;
-  int Spdt=30;
-  int Spnm=40;
+  uint8_t Br=100;
+  uint8_t Sptx1=10;
+  uint8_t Sptx2=20;
+  uint8_t Spdt=30;
+  uint8_t Spnm=40;
   bool Bzr=0;
-  int Da=50;
+  uint8_t Da=50;
   int CoHi=0;
-  int mode=0;
-  String newPassword="00000000";
-} settingCache;
+  bool mode=0;
+  char newPassword[9]="00000000";
+} cacheDisplay;
+
+///////////////////////////
+// struck lokasi //////////
+//////////////////////////
+struct SettingLokasi {
+  float Lt=-7.123456;
+  float Lo=112.123456;
+  uint8_t Tm=7;
+  uint8_t Al=10;
+} cacheLokasi;
+
+//////////////////////////
+////  struck pesan ////
+/////////////////////////
+struct SettingPesan {
+  char message1[100]="irfan ardiansyah";
+  char message2[100]="frigat lidya";
+  char textName[100]="test test";
+  uint8_t index=1;
+} cachePesan;
 
 String DEVICE_ID;
 
@@ -92,21 +115,80 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
   }
 }
 
+///// handle display ///////
 void handleGetDisplay() {
   String json = "{";
 
   json += "\"device_id\":\"" + DEVICE_ID + "\",";
 
-  json += "\"Br\":" + String(settingCache.Br) + ",";
-  json += "\"Sptx1\":" + String(settingCache.Sptx1) + ",";
-  json += "\"Sptx2\":" + String(settingCache.Sptx2) + ",";
-  json += "\"Spdt\":" + String(settingCache.Spdt) + ",";
-  json += "\"Spnm\":" + String(settingCache.Spnm) + ",";
-  json += "\"Bzr\":" + String(settingCache.Bzr) + ",";
-  json += "\"Da\":" + String(settingCache.Da) + ",";
-  json += "\"CoHi\":" + String(settingCache.CoHi) + ",";
-  json += "\"newPassword\":\"" + settingCache.newPassword + "\",";
-  json += "\"mode\":" + String(settingCache.mode);
+  json += "\"Br\":" + String(cacheDisplay.Br) + ",";
+  json += "\"Sptx1\":" + String(cacheDisplay.Sptx1) + ",";
+  json += "\"Sptx2\":" + String(cacheDisplay.Sptx2) + ",";
+  json += "\"Spdt\":" + String(cacheDisplay.Spdt) + ",";
+  json += "\"Spnm\":" + String(cacheDisplay.Spnm) + ",";
+  json += "\"Bzr\":" + String(cacheDisplay.Bzr) + ",";
+  json += "\"Da\":" + String(cacheDisplay.Da) + ",";
+  json += "\"CoHi\":" + String(cacheDisplay.CoHi) + ",";
+  json += "\"newPassword\":\"" + String(cacheDisplay.newPassword) + "\",";
+  json += "\"mode\":" + String(cacheDisplay.mode);
+
+  json += "}";
+
+  server.send(200, "application/json", json);
+}
+
+//// handle lokasi ////
+void handleGetLokasi() {
+  String json = "{";
+
+  json += "\"Lt\":" + String(cacheLokasi.Lt, 6) + ",";
+  json += "\"Lo\":" + String(cacheLokasi.Lo, 6) + ",";
+  json += "\"Tm\":" + String(cacheLokasi.Tm) + ",";
+  json += "\"Al\":" + String(cacheLokasi.Al);
+
+  json += "}";
+
+  server.send(200, "application/json", json);
+}
+
+//// handle pesan ////
+String jsonEscape(const char* src) {
+  String out;
+  while (*src) {
+    char c = *src++;
+    switch (c) {
+      case '\"': out += "\\\""; break;
+      case '\\': out += "\\\\"; break;
+      case '\n': out += "\\n";  break;
+      case '\r': out += "\\r";  break;
+      case '\t': out += "\\t";  break;
+      default:
+        if ((uint8_t)c < 0x20) {
+          // karakter kontrol lain diabaikan
+        } else {
+          out += c;
+        }
+    }
+  }
+  return out;
+}
+
+void handleGetPesan() {
+  String json = "{";
+
+  json += "\"message1\":\"";
+  json += jsonEscape(cachePesan.message1);
+  json += "\",";
+
+  json += "\"message2\":\"";
+  json += jsonEscape(cachePesan.message2);
+  json += "\",";
+
+  json += "\"textName\":\"";
+  json += jsonEscape(cachePesan.textName);
+  json += "\",";
+
+  json += "\"index\":" + String(cachePesan.index);
 
   json += "}";
 
@@ -340,8 +422,9 @@ void AP_init() {
 
   server.on("/setPanel", handleSetTime);
   server.on("/id", handleGetID);
-  server.on("/setting", handleGetDisplay);
-
+  server.on("/display", handleGetDisplay);
+  server.on("/lokasi", handleGetLokasi);
+  server.on("/pesan", handleGetPesan);
 
   server.begin();
   webSocket.begin();
