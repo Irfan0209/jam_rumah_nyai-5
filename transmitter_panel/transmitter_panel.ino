@@ -41,6 +41,26 @@ bool modeOTA = false;
 unsigned long lastTimeSend = 0;
 const unsigned long intervalSendTime = 60000; // 1 menit
 
+struct SettingCache {
+  int Br=50;
+  int Sptx1=50;
+  int Sptx2=50;
+  int Spdt=50;
+  int Spnm=50;
+  bool Bzr=1;
+  int Da=40;
+  int CoHi=-1;
+  int mode=0;
+  String newPassword="00000000";
+} settingCache;
+
+String DEVICE_ID;
+
+void handleGetID() {
+  String json = "device_id = " + DEVICE_ID;
+  server.send(200, "application/json", json);
+}
+
 void getData(String input) {
   Serial.println(input);
   // Di sini bisa tambahkan pengolahan data lebih lanjut
@@ -71,6 +91,29 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     }
   }
 }
+
+void handleGetDisplay() {
+  String json = "{";
+
+  json += "\"device_id\":\"" + DEVICE_ID + "\",";
+
+  json += "\"Br\":" + String(settingCache.Br) + ",";
+  json += "\"Sptx1\":" + String(settingCache.Sptx1) + ",";
+  json += "\"Sptx2\":" + String(settingCache.Sptx2) + ",";
+  json += "\"Spdt\":" + String(settingCache.Spdt) + ",";
+  json += "\"Spnm\":" + String(settingCache.Spnm) + ",";
+  json += "\"Bzr\":" + String(settingCache.Bzr) + ",";
+  json += "\"Da\":" + String(settingCache.Da) + ",";
+  json += "\"CoH\":" + String(settingCache.CoHi) + ",";
+  json += "\"newPassword\":\"" + settingCache.newPassword + "\",";
+  json += "\"mode\":" + String(settingCache.mode);
+
+  json += "}";
+
+  server.send(200, "application/json", json);
+}
+
+
 
 void handleSetTime() {
   String data = "";
@@ -296,6 +339,10 @@ void AP_init() {
   WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
   server.on("/setPanel", handleSetTime);
+  server.on("/id", handleGetID);
+  server.on("/setting", handleGetDisplay);
+
+
   server.begin();
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
@@ -436,6 +483,8 @@ void setup() {
   EEPROM.begin(EEPROM_SIZE);
   //waitingWiFiInfo = EEPROM.read(ADDR_MODE);
   //Serial.println("waitingWiFiInfo:"+String(waitingWiFiInfo));
+  
+  DEVICE_ID = "JWS-" + String(ESP.getChipId());
 
   AP_init();
   waitingWiFiInfo = true;

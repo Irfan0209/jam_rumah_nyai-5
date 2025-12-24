@@ -405,10 +405,10 @@ void loop() {
       runningTextInfo1();
     break;
 
-    case ANIM_TEXT2 :
-      runAnimasiJam2();
-      runningTextInfo2();
-    break;
+//    case ANIM_TEXT2 :
+//      runAnimasiJam2();
+//      runningTextInfo2();
+//    break;
 
     case ANIM_SHOLAT :
        animasiJadwalSholat();
