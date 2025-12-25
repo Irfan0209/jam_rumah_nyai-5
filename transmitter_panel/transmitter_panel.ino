@@ -77,6 +77,34 @@ struct SettingPesan {
   uint8_t index=1;
 } cachePesan;
 
+/////////////////////////
+////  struck koreksi  ///
+/////////////////////////
+struct SettingKoreksi {
+  uint8_t SUBUH_KOREKSI=1;
+  uint8_t DHUHUR_KOREKSI=2;
+  uint8_t ASHAR_KOREKSI=3;
+  uint8_t MAGHRIB_KOREKSI=4;
+  uint8_t ISYA_KOREKSI=5;
+} cacheKoreksi;
+
+/////////////////////////
+////  struck iqomah  ///
+/////////////////////////
+struct SettingIqomah {
+  uint8_t SUBUH_IQOMAH=1;
+  uint8_t DHUHUR_IQOMAH=2;
+  uint8_t ASHAR_IQOMAH=3;
+  uint8_t MAGHRIB_IQOMAH=4;
+  uint8_t ISYA_IQOMAH=5;
+
+  uint8_t SUBUH_BLINK=1;
+  uint8_t DHUHUR_BLINK=2;
+  uint8_t ASHAR_BLINK=3;
+  uint8_t MAGHRIB_BLINK=4;
+  uint8_t ISYA_BLINK=5;
+} cacheIqomah;
+
 String DEVICE_ID;
 
 void handleGetID() {
@@ -195,6 +223,43 @@ void handleGetPesan() {
   server.send(200, "application/json", json);
 }
 
+//// hande koreksi /////
+void handleGetKoreksi() {
+  String json = "{";
+
+  json += "\"SUBUH\":" + String(cacheKoreksi.SUBUH_KOREKSI) + ",";
+  json += "\"DHUHUR\":" + String(cacheKoreksi.DHUHUR_KOREKSI) + ",";
+  json += "\"ASHAR\":" + String(cacheKoreksi.ASHAR_KOREKSI) + ",";
+  json += "\"MAGHRIB\":" + String(cacheKoreksi.MAGHRIB_KOREKSI) + ",";
+  json += "\"ISYA\":" + String(cacheKoreksi.ISYA_KOREKSI);
+
+  json += "}";
+
+  server.send(200, "application/json", json);
+}
+
+////  handle iqomah  ////
+void handleGetIqomah() {
+  String json = "{";
+
+  // === IQOMAH ===
+  json += "\"SUBUH_IQOMAH\":"   + String(cacheIqomah.SUBUH_IQOMAH)   + ",";
+  json += "\"DHUHUR_IQOMAH\":"  + String(cacheIqomah.DHUHUR_IQOMAH)  + ",";
+  json += "\"ASHAR_IQOMAH\":"   + String(cacheIqomah.ASHAR_IQOMAH)   + ",";
+  json += "\"MAGHRIB_IQOMAH\":" + String(cacheIqomah.MAGHRIB_IQOMAH) + ",";
+  json += "\"ISYA_IQOMAH\":"    + String(cacheIqomah.ISYA_IQOMAH)    + ",";
+
+  // === BLINK ===
+  json += "\"SUBUH_BLINK\":"    + String(cacheIqomah.SUBUH_BLINK)    + ",";
+  json += "\"DHUHUR_BLINK\":"   + String(cacheIqomah.DHUHUR_BLINK)   + ",";
+  json += "\"ASHAR_BLINK\":"    + String(cacheIqomah.ASHAR_BLINK)    + ",";
+  json += "\"MAGHRIB_BLINK\":"  + String(cacheIqomah.MAGHRIB_BLINK)  + ",";
+  json += "\"ISYA_BLINK\":"     + String(cacheIqomah.ISYA_BLINK);
+
+  json += "}";
+
+  server.send(200, "application/json", json);
+}
 
 
 void handleSetTime() {
@@ -425,6 +490,8 @@ void AP_init() {
   server.on("/display", handleGetDisplay);
   server.on("/lokasi", handleGetLokasi);
   server.on("/pesan", handleGetPesan);
+  server.on("/koreksi", handleGetKoreksi);
+  server.on("/iqomah", handleGetIqomah);
 
   server.begin();
   webSocket.begin();
