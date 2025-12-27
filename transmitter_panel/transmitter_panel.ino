@@ -63,7 +63,7 @@ struct SettingDisplay {
 struct SettingLokasi {
   float Lt=-7.123456;
   float Lo=112.123456;
-  uint8_t Tm=7;
+  uint8_t Tz=7;
   uint8_t Al=10;
 } cacheLokasi;
 
@@ -107,11 +107,6 @@ struct SettingIqomah {
 
 String DEVICE_ID;
 
-void handleGetID() {
-  String json = "device_id = " + DEVICE_ID;
-  server.send(200, "application/json", json);
-}
-
 void getData(String input) {
   Serial.println(input);
   // Di sini bisa tambahkan pengolahan data lebih lanjut
@@ -143,8 +138,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
   }
 }
 
+void handleGetID() {
+  String json = "device_id = " + DEVICE_ID;
+  server.send(200, "application/json", json);
+}
+
 ///// handle display ///////
 void handleGetDisplay() {
+  cekInput("REQ:DISPLAY");
   String json = "{";
 
   json += "\"device_id\":\"" + DEVICE_ID + "\",";
@@ -163,15 +164,17 @@ void handleGetDisplay() {
   json += "}";
 
   server.send(200, "application/json", json);
+  Serial.println("display ready");
 }
 
 //// handle lokasi ////
 void handleGetLokasi() {
+  cekInput("REQ:LOKASI");
   String json = "{";
-
+  json += "\"device_id\":\"" + DEVICE_ID + "\",";
   json += "\"Lt\":" + String(cacheLokasi.Lt, 6) + ",";
   json += "\"Lo\":" + String(cacheLokasi.Lo, 6) + ",";
-  json += "\"Tm\":" + String(cacheLokasi.Tm) + ",";
+  json += "\"Tz\":" + String(cacheLokasi.Tz) + ",";
   json += "\"Al\":" + String(cacheLokasi.Al);
 
   json += "}";
@@ -202,8 +205,9 @@ String jsonEscape(const char* src) {
 }
 
 void handleGetPesan() {
+  cekInput("REQ:PESAN");
   String json = "{";
-
+  json += "\"device_id\":\"" + DEVICE_ID + "\",";
   json += "\"message1\":\"";
   json += jsonEscape(cachePesan.message1);
   json += "\",";
@@ -223,25 +227,24 @@ void handleGetPesan() {
   server.send(200, "application/json", json);
 }
 
-//// hande koreksi /////
-void handleGetKoreksi() {
-  String json = "{";
 
-  json += "\"SUBUH\":" + String(cacheKoreksi.SUBUH_KOREKSI) + ",";
-  json += "\"DHUHUR\":" + String(cacheKoreksi.DHUHUR_KOREKSI) + ",";
-  json += "\"ASHAR\":" + String(cacheKoreksi.ASHAR_KOREKSI) + ",";
-  json += "\"MAGHRIB\":" + String(cacheKoreksi.MAGHRIB_KOREKSI) + ",";
-  json += "\"ISYA\":" + String(cacheKoreksi.ISYA_KOREKSI);
-
-  json += "}";
-
-  server.send(200, "application/json", json);
-}
+void handleGetKoreksi() { 
+  cekInput("REQ:KOREKSI");
+  String json = "{"; 
+  json += "\"device_id\":\"" + DEVICE_ID + "\","; 
+  json += "\"SUBUH_KOREKSI\":" + String(cacheKoreksi.SUBUH_KOREKSI) + ","; 
+  json += "\"DHUHUR_KOREKSI\":" + String(cacheKoreksi.DHUHUR_KOREKSI) + ","; 
+  json += "\"ASHAR_KOREKSI\":" + String(cacheKoreksi.ASHAR_KOREKSI) + ","; 
+  json += "\"MAGHRIB_KOREKSI\":" + String(cacheKoreksi.MAGHRIB_KOREKSI) + ","; 
+  json += "\"ISYA_KOREKSI\":" + String(cacheKoreksi.ISYA_KOREKSI); 
+  json += "}"; server.send(200, "application/json", 
+  json); }
 
 ////  handle iqomah  ////
 void handleGetIqomah() {
+  cekInput("REQ:IQOMAH");
   String json = "{";
-
+  json += "\"device_id\":\"" + DEVICE_ID + "\",";
   // === IQOMAH ===
   json += "\"SUBUH_IQOMAH\":"   + String(cacheIqomah.SUBUH_IQOMAH)   + ",";
   json += "\"DHUHUR_IQOMAH\":"  + String(cacheIqomah.DHUHUR_IQOMAH)  + ",";
@@ -582,6 +585,72 @@ void kirimDataKeClient(String data) {
 }
 
 void cekSerialMonitor() {
+  if (!Serial.available()) return;
+
+  String input = Serial.readStringUntil('\n');
+  input.trim();
+  if (input.length() == 0) return;
+
+  /* ========= WIFI SETUP ========= */
+  if (input.startsWith("WIFI_SSID:")) {
+    input.remove(0, 10);
+    input.toCharArray(newSSID, sizeof(newSSID));
+    ssidReceived = true;
+    return;
+  }
+
+  if (input.startsWith("WIFI_PASS:")) {
+    input.remove(0, 10);
+    input.toCharArray(newPASS, sizeof(newPASS));
+    passReceived = true;
+    return;
+  }
+
+  if (ssidReceived && passReceived) {
+    waitingWiFiInfo = false;
+    ONLINE(newSSID, newPASS);
+    return;
+  }
+
+  /* ========= RESPONSE DARI JAM ========= */
+  if (input.startsWith("DISPLAY:")) {
+    input.remove(0, 8);
+    parseDisplay(input);
+    return;
+  }
+
+  if (input.startsWith("LOKASI:")) {
+    input.remove(0,7);
+    parseLokasi(input);
+    return;
+  }
+
+  if (input.startsWith("PESAN:")) {
+    input.remove(0,6);
+    parsePesan(input);
+    return;
+  }
+
+  if (input.startsWith("KOREKSI:")) {
+    input.remove(0,8);
+    parseKoreksi(input);
+    return;
+  }
+
+  if (input.startsWith("IQOMAH:")) {
+    input.remove(0,7);
+    parseIqomah(input);
+    return;
+  }
+
+
+  /* ========= LAINNYA ========= */
+  kirimDataKeClient(input);
+}
+
+
+/*
+void cekSerialMonitor() {
   if (Serial.available()) {
     String input = Serial.readStringUntil('\n');
     input.trim();
@@ -618,7 +687,139 @@ void cekSerialMonitor() {
       }
     }
   }
+}*/
+
+void cekInput(String input){
+  Serial.println(input);
 }
+
+void parseDisplay(String payload) {
+  int pos = 0;
+
+  while (pos < payload.length()) {
+    int eq = payload.indexOf('=', pos);
+    int cm = payload.indexOf(',', pos);
+    if (eq == -1) break;
+    if (cm == -1) cm = payload.length();
+
+    String key   = payload.substring(pos, eq);
+    String value = payload.substring(eq + 1, cm);
+
+    int v = value.toInt();
+
+    if (key == "Br")        cacheDisplay.Br = v;
+    else if (key == "Sptx1") cacheDisplay.Sptx1 = v;
+    else if (key == "Sptx2") cacheDisplay.Sptx2 = v;
+    else if (key == "Spnm")  cacheDisplay.Spnm  = v;
+
+    pos = cm + 1;
+  }
+
+  // DEBUG
+//  Serial.println("[DISPLAY UPDATED]");
+//  Serial.println("Br=" + String(Br));
+//  Serial.println("Sptx1=" + String(Sptx1));
+//  Serial.println("Sptx2=" + String(Sptx2));
+//  Serial.println("Spnm=" + String(Spnm));
+}
+
+
+void parseLokasi(String payload) {
+  int pos = 0;
+  while (pos < payload.length()) {
+    int eq = payload.indexOf('=', pos);
+    int cm = payload.indexOf(',', pos);
+    if (eq == -1) break;
+    if (cm == -1) cm = payload.length();
+
+    String key = payload.substring(pos, eq);
+    String val = payload.substring(eq + 1, cm);
+
+    if (key == "Lt") cacheLokasi.Lt = val.toFloat();
+    else if (key == "Lo") cacheLokasi.Lo = val.toFloat();
+    else if (key == "Tz") cacheLokasi.Tz = val.toInt();
+    else if (key == "Al") cacheLokasi.Al = val.toInt();
+
+    pos = cm + 1;
+  }
+}
+
+void parsePesan(String payload) {
+  int pos = 0;
+  while (pos < payload.length()) {
+    int eq = payload.indexOf('=', pos);
+    int cm = payload.indexOf(',', pos);
+    if (eq == -1) break;
+    if (cm == -1) cm = payload.length();
+
+    String key = payload.substring(pos, eq);
+    String val = payload.substring(eq + 1, cm);
+
+    if (key == "M1") val.toCharArray(cachePesan.message1, sizeof(cachePesan.message1));
+    else if (key == "M2") val.toCharArray(cachePesan.message2, sizeof(cachePesan.message2));
+    else if (key == "NM") val.toCharArray(cachePesan.textName, sizeof(cachePesan.textName));
+    else if (key == "IDX") cachePesan.index = val.toInt();
+
+    pos = cm + 1;
+  }
+}
+
+void parseKoreksi(String payload) {
+  int pos = 0;
+  while (pos < payload.length()) {
+    int eq = payload.indexOf('=', pos);
+    int cm = payload.indexOf(',', pos);
+    if (eq == -1) break;
+    if (cm == -1) cm = payload.length();
+
+    uint8_t idx = payload.substring(pos, eq).toInt();
+    int val = payload.substring(eq + 1, cm).toInt();
+
+    //if (idx >= 1 && idx <= 5) koreksi[idx] = val;
+    if(idx == 1) cacheKoreksi.SUBUH_KOREKSI = val;
+    else if(idx == 2) cacheKoreksi.DHUHUR_KOREKSI = val;
+    else if(idx == 3) cacheKoreksi.ASHAR_KOREKSI = val;
+    else if(idx == 4) cacheKoreksi.MAGHRIB_KOREKSI = val;
+    else if(idx == 5) cacheKoreksi.ISYA_KOREKSI = val;
+
+    pos = cm + 1;
+  }
+}
+
+void parseIqomah(String payload) {
+  int pos = 0;
+  while (pos < payload.length()) {
+    int eq = payload.indexOf('=', pos);
+    int cm = payload.indexOf(',', pos);
+    if (eq == -1) break;
+    if (cm == -1) cm = payload.length();
+
+    String key = payload.substring(pos, eq);
+    int val = payload.substring(eq + 1, cm).toInt();
+
+    if (key.startsWith("I")) {
+      uint8_t idx = key.substring(1).toInt();
+      //if (idx >= 1 && idx <= 5) iqomah[idx] = val;
+      if(idx == 1) cacheIqomah.SUBUH_IQOMAH = val;
+      else if(idx == 2) cacheIqomah.DHUHUR_IQOMAH = val;
+      else if(idx == 3) cacheIqomah.ASHAR_IQOMAH = val;
+      else if(idx == 4) cacheIqomah.MAGHRIB_IQOMAH = val;
+      else if(idx == 5) cacheIqomah.ISYA_IQOMAH = val;
+    }
+    else if (key.startsWith("B")) {
+      uint8_t idx = key.substring(1).toInt();
+      //if (idx >= 1 && idx <= 5) displayBlink[idx] = val;
+      if(idx == 1) cacheIqomah.SUBUH_BLINK = val;
+      else if(idx == 2) cacheIqomah.DHUHUR_BLINK = val;
+      else if(idx == 3) cacheIqomah.ASHAR_BLINK = val;
+      else if(idx == 4) cacheIqomah.MAGHRIB_BLINK = val;
+      else if(idx == 5) cacheIqomah.ISYA_BLINK = val;
+    }
+
+    pos = cm + 1;
+  }
+}
+
 
 int getIntPart(String &s, int &pos) {
   int comma = s.indexOf(',', pos);

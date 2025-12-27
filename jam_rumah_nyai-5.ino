@@ -171,7 +171,12 @@ void handleSetTimeSerial() {
   input.trim(); // hapus spasi dan newline
 
   if (input.length() == 0) return;
-
+  
+  if (req == "REQ:DISPLAY")  kirimDisplay();
+  else if (req == "REQ:LOKASI")   kirimLokasi();
+  else if (req == "REQ:PESAN")    kirimPesan();
+  else if (req == "REQ:KOREKSI")  kirimKoreksi();
+  else if (req == "REQ:IQOMAH")   kirimIqomah();
 //  Serial.print("Input diterima: ");
 //  Serial.println(input);
 
