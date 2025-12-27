@@ -172,11 +172,11 @@ void handleSetTimeSerial() {
 
   if (input.length() == 0) return;
   
-  if (req == "REQ:DISPLAY")  kirimDisplay();
-  else if (req == "REQ:LOKASI")   kirimLokasi();
-  else if (req == "REQ:PESAN")    kirimPesan();
-  else if (req == "REQ:KOREKSI")  kirimKoreksi();
-  else if (req == "REQ:IQOMAH")   kirimIqomah();
+  if (input == "REQ:DISPLAY")  kirimDisplay();
+  else if (input == "REQ:LOKASI")   kirimLokasi();
+  else if (input == "REQ:PESAN")    kirimPesan();
+  else if (input == "REQ:KOREKSI")  kirimKoreksi();
+  else if (input == "REQ:IQOMAH")   kirimIqomah();
 //  Serial.print("Input diterima: ");
 //  Serial.println(input);
 

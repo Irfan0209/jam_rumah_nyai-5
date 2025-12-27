@@ -711,6 +711,12 @@ void parseDisplay(String payload) {
     else if (key == "Sptx1") cacheDisplay.Sptx1 = v;
     else if (key == "Sptx2") cacheDisplay.Sptx2 = v;
     else if (key == "Spnm")  cacheDisplay.Spnm  = v;
+    else if (key == "Spdt")  cacheDisplay.Spdt  = v;
+    else if (key == "Bzr")   cacheDisplay.Bzr   = v;
+    else if (key == "Da")    cacheDisplay.Da    = v;
+    else if (key == "CoHi")  cacheDisplay.CoHi  = v;
+    else if (key == "newPassword") key.toCharArray(cacheDisplay.newPassword, sizeof(cacheDisplay.newPassword));
+    else if (key == "mode")  cacheDisplay.mode  = v;
 
     pos = cm + 1;
   }
