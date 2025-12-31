@@ -17,7 +17,7 @@ DMDESP  Disp(DISPLAYS_WIDE, DISPLAYS_HIGH);  // Jumlah Panel P10 yang digunakan 
 WiFiManager wm; // global wm instance
 
 // Pengaturan hotspot WiFi dari ESP8266
-char ssid[20]     = "JAM_PANEL";
+char ssid[20]     = "JAM_PANEL_5";
 char password[20] = "00000000";
 
 //pengaturan wifi untuk upload program
@@ -410,10 +410,10 @@ void loop() {
       runningTextInfo1();
     break;
 
-//    case ANIM_TEXT2 :
-//      runAnimasiJam2();
-//      runningTextInfo2();
-//    break;
+    case ANIM_TEXT2 :
+      runAnimasiJam2();
+      runningTextInfo2();
+    break;
 
     case ANIM_SHOLAT :
        animasiJadwalSholat();

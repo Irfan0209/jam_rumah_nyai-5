@@ -26,7 +26,7 @@ char password[20] = "00000000";
 
 const char* otaSsid = "KELUARGA02";
 const char* otaPass = "khusnul23";
-const char* otaHost = "SERVER_2";
+const char* otaHost = "SERVER_5";
 
 ESP8266WebServer server(80);
 WebSocketsServer webSocket(81);
@@ -45,14 +45,14 @@ const unsigned long intervalSendTime = 60000; // 1 menit
 ///////struck Display////////
 /////////////////////////////
 struct SettingDisplay {
-  uint8_t Br=100;
-  uint8_t Sptx1=10;
-  uint8_t Sptx2=20;
-  uint8_t Spdt=30;
-  uint8_t Spnm=40;
-  bool Bzr=0;
-  uint8_t Da=50;
-  int CoHi=0;
+  uint8_t Br;
+  uint8_t Sptx1;
+  uint8_t Sptx2;
+  uint8_t Spdt;
+  uint8_t Spnm;
+  bool Bzr;
+  uint8_t Da;
+  int CoHi;
   bool mode=0;
   char newPassword[9]="00000000";
 } cacheDisplay;
@@ -61,19 +61,19 @@ struct SettingDisplay {
 // struck lokasi //////////
 //////////////////////////
 struct SettingLokasi {
-  float Lt=-7.123456;
-  float Lo=112.123456;
-  uint8_t Tz=7;
-  uint8_t Al=10;
+  float Lt;
+  float Lo;
+  uint8_t Tz;
+  uint8_t Al;
 } cacheLokasi;
 
 //////////////////////////
 ////  struck pesan ////
 /////////////////////////
 struct SettingPesan {
-  char message1[100]="irfan ardiansyah";
-  char message2[100]="frigat lidya";
-  char textName[100]="test test";
+  char message1[100];
+  char message2[100];
+  char textName[100];
   uint8_t index=1;
 } cachePesan;
 
@@ -81,28 +81,28 @@ struct SettingPesan {
 ////  struck koreksi  ///
 /////////////////////////
 struct SettingKoreksi {
-  uint8_t SUBUH_KOREKSI=1;
-  uint8_t DHUHUR_KOREKSI=2;
-  uint8_t ASHAR_KOREKSI=3;
-  uint8_t MAGHRIB_KOREKSI=4;
-  uint8_t ISYA_KOREKSI=5;
+  uint8_t SUBUH_KOREKSI;
+  uint8_t DHUHUR_KOREKSI;
+  uint8_t ASHAR_KOREKSI;
+  uint8_t MAGHRIB_KOREKSI;
+  uint8_t ISYA_KOREKSI;
 } cacheKoreksi;
 
 /////////////////////////
 ////  struck iqomah  ///
 /////////////////////////
 struct SettingIqomah {
-  uint8_t SUBUH_IQOMAH=1;
-  uint8_t DHUHUR_IQOMAH=2;
-  uint8_t ASHAR_IQOMAH=3;
-  uint8_t MAGHRIB_IQOMAH=4;
-  uint8_t ISYA_IQOMAH=5;
+  uint8_t SUBUH_IQOMAH;
+  uint8_t DHUHUR_IQOMAH;
+  uint8_t ASHAR_IQOMAH;
+  uint8_t MAGHRIB_IQOMAH;
+  uint8_t ISYA_IQOMAH;
 
-  uint8_t SUBUH_BLINK=1;
-  uint8_t DHUHUR_BLINK=2;
-  uint8_t ASHAR_BLINK=3;
-  uint8_t MAGHRIB_BLINK=4;
-  uint8_t ISYA_BLINK=5;
+  uint8_t SUBUH_BLINK;
+  uint8_t DHUHUR_BLINK;
+  uint8_t ASHAR_BLINK;
+  uint8_t MAGHRIB_BLINK;
+  uint8_t ISYA_BLINK;
 } cacheIqomah;
 
 String DEVICE_ID;

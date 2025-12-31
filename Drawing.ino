@@ -35,7 +35,7 @@ void runAnimasiJam1(){
   
    if(y ==9 and flagAnim == true) {s=1;}
 
-   if (y == 0 and s==1) {y=0; s=0; flagAnim = false; counterName==1?show = ANIM_TEXT2:show = ANIM_TEXT1;}
+   if (y == 0 and s==1) {y=0; s=0; flagAnim = false; show = ANIM_TEXT2;}//counterName==1?show = ANIM_TEXT2:show = ANIM_TEXT1;
   
     fType(0); 
     dwCtr(0,y-9, buff_jam); 
